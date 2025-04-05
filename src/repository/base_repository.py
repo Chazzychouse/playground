@@ -9,8 +9,9 @@ class BaseRepository(ABC):
     def get_all(self) -> List[Tuple]:
         pass
     
-    def execute_query(self, query: str, params: Optional[Tuple] = None) -> List[Tuple]:
+    def execute_query(self, query: str, params: Optional[Tuple] = None) -> List[Dict[str, Any]]:
         with self.database.get_connection() as conn:
+            conn.row_factory = lambda c, r: {col[0]: r[idx] for idx, col in enumerate(c.description)}
             cursor = conn.cursor()
             cursor.execute(query, params or ())
             return cursor.fetchall()

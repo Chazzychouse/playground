@@ -2,8 +2,9 @@ from contextlib import contextmanager
 import sqlite3
 
 class Database:
-    def __init__(self, db_name='database.db'):
+    def __init__(self, db_name):
         self.db_name = db_name
+        self.initialize_db()
     
     @contextmanager
     def get_connection(self):
@@ -14,16 +15,24 @@ class Database:
             conn.close()
     
     def initialize_db(self):
+        print("Initializing database...")
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
+            print("Creating users table...")
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL
+                username TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )''')
             
+            print("Creating products table...")
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,8 +41,8 @@ class Database:
             )''')
             
             conn.commit()
+        print("Database initialized.")
 
 if __name__ == '__main__':
-    db = Database()
-    db.initialize_db()
+    db = Database("test.db")
 

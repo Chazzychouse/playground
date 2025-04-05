@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Dict, Any
 
 @dataclass
 class Product:
@@ -7,13 +7,21 @@ class Product:
     price: float
     id: Optional[int] = None
     
-    def to_tuple(self) -> tuple:
-        return (self.name, self.price)
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert product to dictionary, excluding None values"""
+        result = {
+            "name": self.name,
+            "price": self.price
+        }
+        if self.id is not None:
+            result["id"] = self.id
+        return result
     
     @classmethod
-    def from_tuple(cls, data: tuple) -> 'Product':
-        if len(data) == 2:
-            return cls(name=data[0], price=data[1])
-        elif len(data) == 3:
-            return cls(name=data[1], price=data[2], id=data[0])
-        raise ValueError("Invalid tuple format") 
+    def from_dict(cls, data: Dict[str, Any]) -> 'Product':
+        """Create a Product instance from a dictionary"""
+        return cls(
+            name=data['name'],
+            price=data['price'],
+            id=data.get('id')  # Use get to handle optional id
+        ) 

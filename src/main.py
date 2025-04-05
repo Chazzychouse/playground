@@ -1,32 +1,32 @@
-from repository import UserRepository, ProductRepository, Database
-from models import User, Product
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
-def main():
-    db = Database("app.db")
-    db.initialize_db()
-    
-    user_repo = UserRepository(db)
-    product_repo = ProductRepository(db)
-    
-    new_user = User(username="john_doe", password="secure_password")
-    user_id = user_repo.create_user(new_user)
-    print(f"Created user with ID: {user_id}")
-    
-    users = user_repo.get_all()
-    print("All users:")
-    for user in users:
-        print(f"Username: {user.username}, Password: {user.password}")
-    
-    new_product = Product(name="Laptop", price=999.99)
-    product_id = product_repo.create_product(new_product)
-    print(f"Created product with ID: {product_id}")
-    
-    products = product_repo.get_all()
-    print("All products:")
-    for product in products:
-        print(f"Product: {product.name}, Price: ${product.price:.2f}")
+from api.routes.user_routes import router as user_router
 
+app = FastAPI(
+    title="Playground API",
+    description="API for the playground application",
+    version="0.1.0",
+    debug=True
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(user_router)
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Playground API"}
+
+# Running the app
 if __name__ == "__main__":
-    main()
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 
